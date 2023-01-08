@@ -15,27 +15,27 @@ class Piece {
 
     public:
         Piece(Integer north, Integer east, Integer south, Integer west, boolean isAnchored) {
-            this.north = north;
-            this.east = east;
-            this.south = south;
-            this.west = west;
-            this.isAnchored = isAnchored;
+            this->north = north;
+            this->east = east;
+            this->south = south;
+            this->west = west;
+            this->isAnchored = isAnchored;
         }
 
         Integer getNorth() {
-            return this.north;
+            return this->north;
         }
 
         Integer getEast() {
-            return this.east;
+            return this->east;
         }
 
         Integer getSouth() {
-            return this.south;
+            return this->south;
         }
 
         Integer getWest() {
-            return this.west;
+            return this->west;
         }
 
         std::ostream &operator<<(std::ostream &os, const Piece &piece) {
