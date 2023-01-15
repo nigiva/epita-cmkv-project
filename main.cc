@@ -23,24 +23,21 @@ std::string readFile(std::string filepath)
     return content;
 }
 
-int main()
+int main(int argc, char **argv)
 {
-    Piece p = Piece::fromString("1234 @");
-    std::cout << p << std::endl;
+    if (argc != 3)
+    {
+        std::cout << "Usage: " << argv[0]
+                  << " <input board filepath> <output solution filepath>"
+                  << std::endl;
+        return 1;
+    }
 
-    Board b(5);
-    std::cout << b.getBoardSeperator(5) << std::endl;
-    b.print();
-    std::cout << "-------------" << std::endl;
-    std::string content = readFile("data/input/s2-02.txt");
-    std::cout << content << std::endl;
-    std::cout << "-------------" << std::endl;
-    Board b2 = Board::fromString(content);
-    b2.print();
-    std::cout << "-------------" << std::endl;
-    std::cout << Board::getBoardOnePieceLine({ 1, 2, 3, 4, 5 });
-    std::cout << Board::getBoardTwoPieceLine({ 1, 2, 3, 4, 5 }, { true, false, true, false, true }, { 6, 7, 8, 9, 0 }) << std::endl;
-    std::cout << "-------------" << std::endl;
-    std::cout << b2 << std::endl;
+    std::string inputPath = argv[1];
+    std::string outputPath = argv[2];
+
+    std::string inputBoardContent = readFile(inputPath);
+    Board board = Board::fromString(inputBoardContent);
+    std::cout << board << std::endl;
     return 0;
 }
