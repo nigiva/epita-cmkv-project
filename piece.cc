@@ -1,17 +1,29 @@
 #include "piece.hh"
 
+#include <stdexcept>
+
+int charToInt(char c)
+{
+    if (c < '0' || c > '9')
+    {
+        throw std::invalid_argument(
+            "Invalid char, must be between 0 and 9 to convert to int");
+    }
+    return c - '0';
+}
 
 Piece Piece::from_string(std::string s)
 {
-    if (s.size() != 4 || s.size() != 6)
+    if (s.size() != 4 && s.size() != 6)
     {
-        throw "Invalid string length";
+        throw std::invalid_argument("Invalid string length");
     }
 
-    int north = s[0] - '0';
-    int east = s[1] - '0';
-    int south = s[2] - '0';
-    int west = s[3] - '0';
+    int north = charToInt(s[0]);
+    int west = charToInt(s[1]);
+    int east = charToInt(s[2]);
+    int south = charToInt(s[3]);
+
     bool isAnchored = false;
 
     if (s.size() == 6)
@@ -30,9 +42,11 @@ Piece Piece::from_string(std::string s)
 /** std:cout << Piece */
 std::ostream &operator<<(std::ostream &os, const Piece &p)
 {
+    char anchor = p.getIsAnchored() ? '@' : ' ';
+
     os << "+-----+\n";
     os << "|  " << p.getNorth() << "  |\n";
-    os << "| " << p.getWest() << " " << p.getEast() << " |\n";
+    os << "| " << p.getWest() << anchor << p.getEast() << " |\n";
     os << "|  " << p.getSouth() << "  |\n";
     os << "+-----+";
     return os;
