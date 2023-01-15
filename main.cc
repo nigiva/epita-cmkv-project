@@ -37,5 +37,10 @@ int main()
     std::cout << "-------------" << std::endl;
     Board b2 = Board::fromString(content);
     b2.print();
+    std::cout << "-------------" << std::endl;
+    std::cout << Board::getBoardOnePieceLine({ 1, 2, 3, 4, 5 });
+    std::cout << Board::getBoardTwoPieceLine({ 1, 2, 3, 4, 5 }, { true, false, true, false, true }, { 6, 7, 8, 9, 0 }) << std::endl;
+    std::cout << "-------------" << std::endl;
+    std::cout << b2 << std::endl;
     return 0;
 }

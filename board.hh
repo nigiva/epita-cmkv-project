@@ -39,9 +39,12 @@ public:
     static std::string getBoardOnePieceLine(std::vector<size_t> numberList);
     static std::string
     getBoardTwoPieceLine(std::vector<size_t> firstNumberList,
+                         std::vector<bool> anchorList,
                          std::vector<size_t> secondNumberList);
     void print() const;
     void setPiece(size_t x, size_t y, Piece piece);
+    std::optional<Piece> getPiece(long long int x, long long int y) const;
+    size_t getSize() const;
 };
 
 std::ostream &operator<<(std::ostream &os, const Board &board);
