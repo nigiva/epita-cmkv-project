@@ -6,6 +6,7 @@ SRC := $(wildcard *.cc)
 OBJ := $(SRC:.cc=.o)
 
 all: $(TARGET)
+	./$(TARGET)
 
 $(TARGET): $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS)

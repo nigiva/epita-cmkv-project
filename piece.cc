@@ -12,7 +12,7 @@ int charToInt(char c)
     return c - '0';
 }
 
-Piece Piece::from_string(std::string s)
+Piece Piece::fromString(std::string s)
 {
     if (s.size() != 4 && s.size() != 6)
     {

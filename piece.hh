@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <string>
 
@@ -48,7 +49,7 @@ public:
     /**
      * Creates a piece from a string representation.
      */
-    static Piece from_string(std::string s);
+    static Piece fromString(std::string s);
 };
 
 std::ostream &operator<<(std::ostream &os, const Piece &p);
