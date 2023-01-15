@@ -1,13 +1,13 @@
 CC := g++
 CFLAGS := -Wall -Werror -Wextra -g -DNDEBUG -O5 -std=c++17 -lpthread -Wl,--no-as-needed
-TARGET := a.out
+TARGET := solver
 
-SRCS := $(wildcard *.cc)
-OBJS := $(patsubst %.cc,%.o,$(SRC))
+SRC := $(wildcard *.cc)
+OBJ := $(SRC:.cc=.o)
 
 all: $(TARGET)
 
-$(TARGET): $(OBJS)
+$(TARGET): $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS)
 
 %.o: %.cc
