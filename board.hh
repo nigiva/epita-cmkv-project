@@ -45,6 +45,14 @@ public:
     void setPiece(size_t x, size_t y, Piece piece);
     std::optional<Piece> getPiece(long long int x, long long int y) const;
     size_t getSize() const;
+
+    std::vector<Coords> getMovablePieceCoordsList() const;
+    Coords get2RandomMovablePieceCoords() const;
+    void randomSwap();
+    void reverseLastRandomSwap();
+    void swap(Coords coords1, Coords coords2);
+    float loss() const;
+    Board copy() const;
 };
 
 std::ostream &operator<<(std::ostream &os, const Board &board);
