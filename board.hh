@@ -28,8 +28,7 @@ private:
     std::vector<std::vector<std::optional<Piece>>> board;
     size_t numPieces;
     size_t numEdges;
-    std::optional<Coords> fromLastRandomSwap;
-    std::optional<Coords> toLastRandomSwap;
+    std::optional<std::pair<Coords, Coords>> lastRandomSwap;
 
 public:
     Board(size_t size);
@@ -47,10 +46,10 @@ public:
     size_t getSize() const;
 
     std::vector<Coords> getMovablePieceCoordsList() const;
-    Coords get2RandomMovablePieceCoords() const;
+    std::pair<Coords, Coords> get2RandomMovablePieceCoords() const;
     void randomSwap();
     void reverseLastRandomSwap();
-    void swap(Coords coords1, Coords coords2);
+    void swap(const Coords &coords1, const Coords &coords2);
     float loss() const;
     Board copy() const;
 };

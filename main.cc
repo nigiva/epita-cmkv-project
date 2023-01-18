@@ -39,5 +39,19 @@ int main(int argc, char **argv)
     std::string inputBoardContent = readFile(inputPath);
     Board board = Board::fromString(inputBoardContent);
     std::cout << board << std::endl;
+    auto copyBoard = board.copy();
+    std::cout << "-----" << std::endl;
+    board.randomSwap();
+    std::cout << board << std::endl;
+    board.randomSwap();
+    std::cout << board << std::endl;
+    board.reverseLastRandomSwap();
+    std::cout << board << std::endl;
+    board.reverseLastRandomSwap();
+    std::cout << board << std::endl;
+    board.randomSwap();
+    std::cout << board << std::endl;
+    std::cout << "-----" << std::endl;
+    std::cout << copyBoard << std::endl;
     return 0;
 }

@@ -1,7 +1,9 @@
 #include "board.hh"
 
+#include <algorithm>
 #include <cmath>
 #include <iostream>
+#include <random>
 #include <sstream>
 #include <stdexcept>
 
@@ -159,4 +161,104 @@ std::ostream &operator<<(std::ostream &os, const Board &board)
         os << Board::getBoardSeperator(board.getSize());
     }
     return os;
+}
+
+std::vector<Coords> Board::getMovablePieceCoordsList() const
+{
+    std::vector<Coords> coordsList;
+    for (size_t i = 0; i < this->size; i++)
+    {
+        for (size_t j = 0; j < this->size; j++)
+        {
+            std::optional<Piece> piece = this->getPiece(i, j);
+            if (piece.has_value() && !piece.value().getIsAnchored())
+            {
+                coordsList.push_back(Coords(i, j));
+            }
+        }
+    }
+    return coordsList;
+}
+
+std::pair<Coords, Coords> Board::get2RandomMovablePieceCoords() const
+{
+    std::vector<Coords> coordsList = this->getMovablePieceCoordsList();
+    std::random_device rd;
+    std::mt19937 g(rd());
+    std::shuffle(coordsList.begin(), coordsList.end(), g);
+    return std::make_pair(coordsList[0], coordsList[1]);
+}
+
+void Board::randomSwap()
+{
+    std::pair<Coords, Coords> coordsPair = this->get2RandomMovablePieceCoords();
+    this->lastRandomSwap = coordsPair;
+    this->swap(coordsPair.first, coordsPair.second);
+}
+
+void Board::reverseLastRandomSwap()
+{
+    if (this->lastRandomSwap.has_value())
+    {
+        this->swap(this->lastRandomSwap.value().first,
+                   this->lastRandomSwap.value().second);
+        this->lastRandomSwap = std::nullopt;
+    }
+}
+
+void Board::swap(const Coords &coords1, const Coords &coords2)
+{
+    size_t x1 = coords1.x;
+    size_t y1 = coords1.y;
+    size_t x2 = coords2.x;
+    size_t y2 = coords2.y;
+    std::optional<Piece> temp = this->board[x1][y1];
+    this->board[x1][y1] = this->board[x2][y2];
+    this->board[x2][y2] = temp;
+}
+
+float Board::loss() const
+{
+    float loss = 0;
+    for (int i = 0; i < static_cast<int>(this->size); i++)
+    {
+        for (int j = 0; j < static_cast<int>(this->size); j++)
+        {
+            std::optional<Piece> piece = this->getPiece(i, j);
+            if (!piece.has_value())
+            {
+                continue;
+            }
+            std::optional<Piece> topPiece = this->getPiece(i - 1, j);
+            std::optional<Piece> bottomPiece = this->getPiece(i + 1, j);
+            std::optional<Piece> leftPiece = this->getPiece(i, j - 1);
+            std::optional<Piece> rightPiece = this->getPiece(i, j + 1);
+            if (topPiece.has_value()
+                && piece.value().getNorth() != topPiece.value().getSouth())
+            {
+                loss += 1;
+            }
+            if (bottomPiece.has_value()
+                && piece.value().getSouth() != bottomPiece.value().getNorth())
+            {
+                loss += 1;
+            }
+            if (leftPiece.has_value()
+                && piece.value().getWest() != leftPiece.value().getEast())
+            {
+                loss += 1;
+            }
+            if (rightPiece.has_value()
+                && piece.value().getEast() != rightPiece.value().getWest())
+            {
+                loss += 1;
+            }
+        }
+    }
+    return loss / this->numEdges;
+}
+
+Board Board::copy() const
+{
+    return Board(*this);
 }
