@@ -8,7 +8,7 @@ OBJ := $(SRC:.cc=.o)
 all: $(TARGET)
 
 test: $(TARGET)
-	./$(TARGET) data/input/s2-02.txt export.txt
+	./$(TARGET) data/input/s2-02.txt export.txt --debug
 
 $(TARGET): $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS)

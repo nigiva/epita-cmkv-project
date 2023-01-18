@@ -14,8 +14,28 @@ int charToInt(char c)
 
 Piece Piece::fromString(std::string s)
 {
+    // Remove invisible char
+    // Somefile editors add a \r at the end of the line
+    // Example: data/input/s4-02.txt
+    auto invisibleCharPosition = s.find("\r");
+    if (invisibleCharPosition != std::string::npos)
+    {
+        s.erase(invisibleCharPosition, 1);
+    }
+
+    // Normaly the string should be 4 or 6 chars long
+    // But in some cases, the string is 5 chars long
+    // because the space between the 4th and 5th char is missing
+    // Example: data/input/s2-02.txt
+    if (s.size() == 5 && s[4] == '@')
+    {
+        s.insert(4, 1, ' ');
+    }
+
     if (s.size() != 4 && s.size() != 6)
     {
+        std::cerr << "Invalid string length: " << s.size() << " line : `" << s
+                  << "`" << std::endl;
         throw std::invalid_argument("Invalid string length");
     }
 

@@ -25,10 +25,13 @@ std::string readFile(std::string filepath)
 
 int main(int argc, char **argv)
 {
-    if (argc != 3)
+    bool defaultArgsCondition = (argc == 3);
+    bool debugArgsCondition = (argc == 4 && std::string(argv[3]) == "--debug");
+    bool debug = debugArgsCondition;
+    if (!defaultArgsCondition && !debugArgsCondition)
     {
         std::cout << "Usage: " << argv[0]
-                  << " <input board filepath> <output solution filepath>"
+                  << " <input board filepath> <output solution filepath> (--debug)"
                   << std::endl;
         return 1;
     }
@@ -38,20 +41,27 @@ int main(int argc, char **argv)
 
     std::string inputBoardContent = readFile(inputPath);
     Board board = Board::fromString(inputBoardContent);
-    std::cout << board << std::endl;
-    auto copyBoard = board.copy();
-    std::cout << "-----" << std::endl;
-    board.randomSwap();
-    std::cout << board << std::endl;
-    board.randomSwap();
-    std::cout << board << std::endl;
-    board.reverseLastRandomSwap();
-    std::cout << board << std::endl;
-    board.reverseLastRandomSwap();
-    std::cout << board << std::endl;
-    board.randomSwap();
-    std::cout << board << std::endl;
-    std::cout << "-----" << std::endl;
-    std::cout << copyBoard << std::endl;
+    if (debug)
+    {
+        std::cout << board << std::endl;
+    }
+
+    auto success = board.solve(1'000'000, // epochMax
+                               1, // initialTemperature
+                               0.9999, // decayRate
+                               debug // verbose
+    );
+    if (debug)
+    {   
+        std::cout << "\n---  RESULT  ---" << std::endl;
+        std::cout << board << std::endl;
+    }
+
+    if (!success)
+    {
+        std::cerr << "Unable to solve the board (loss=" << board.loss() << ")"
+                  << std::endl;
+        return 1;
+    }
     return 0;
 }

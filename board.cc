@@ -262,3 +262,78 @@ Board Board::copy() const
 {
     return Board(*this);
 }
+
+// Generate a random float between 0 and 1
+float normalizedRandom()
+{
+    return std::rand() / static_cast<float>(RAND_MAX);
+}
+
+bool Board::solve(size_t epochMax = 1'000'000, float initialTemperature = 1,
+                  float decayRate = 0.9999, bool verbose = false)
+{
+    auto p = [&](float delta, float temperature) -> float {
+        return std::exp(-delta / temperature);
+    };
+
+    Board optimalBoard = this->copy();
+    float loss = this->loss();
+    float optimalLoss = optimalBoard.loss();
+    size_t epoch = 0;
+    float temperature = initialTemperature;
+    bool success = false;
+    size_t epochPerPercent = epochMax / 100;
+
+    for (epoch = 0; epoch < epochMax; epoch++)
+    {
+        this->randomSwap();
+        float epochLoss = this->loss();
+        float lossDelta = std::abs(epochLoss - loss);
+
+        if (epochLoss < loss || normalizedRandom() < p(lossDelta, temperature))
+        {
+            loss = epochLoss;
+            // Second optimisation
+            // Because some time we fall in local minimum and the temperature
+            // continue to decrease The resolver is stuck in a local minimum To
+            // avoid this, we can freeze the temperature each time we fail to
+            // find a better solution So when we are stuck in a local minimum,
+            // the temperature is high enough to escape at some point
+            temperature *= decayRate;
+        }
+        else
+        {
+            // First optimisation
+            // Instead of copying the board and replace by the previous one
+            // we can just reverse the last swap
+            // With this optimisation, we can go from 4s to 1s
+            this->reverseLastRandomSwap();
+        }
+
+        if (loss < optimalLoss)
+        {
+            optimalLoss = loss;
+            optimalBoard = this->copy();
+        }
+
+        if (epoch % epochPerPercent == 0 && verbose)
+        {
+            std::cout << "[" << epoch << "] Optimal loss : " << optimalLoss
+                      << std::endl;
+        }
+
+        if (optimalLoss == 0)
+        {
+            if (verbose)
+            {
+                std::cout << "[" << epoch << "] Optimal loss : " << optimalLoss
+                          << std::endl;
+            }
+            success = true;
+            break;
+        }
+    }
+
+    this->board = optimalBoard.board;
+    return success;
+}

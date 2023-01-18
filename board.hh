@@ -52,6 +52,9 @@ public:
     void swap(const Coords &coords1, const Coords &coords2);
     float loss() const;
     Board copy() const;
+    bool solve(size_t epochMax, float initialTemperature, float decayRate,
+               bool verbose);
 };
 
 std::ostream &operator<<(std::ostream &os, const Board &board);
+float normalizedRandom();
