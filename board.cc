@@ -182,11 +182,18 @@ std::vector<Coords> Board::getMovablePieceCoordsList() const
 
 std::pair<Coords, Coords> Board::get2RandomMovablePieceCoords() const
 {
-    std::vector<Coords> coordsList = this->getMovablePieceCoordsList();
-    std::random_device rd;
-    std::mt19937 g(rd());
-    std::shuffle(coordsList.begin(), coordsList.end(), g);
-    return std::make_pair(coordsList[0], coordsList[1]);
+    // Get first random piece
+    auto movablePieceCount = this->movablePieceCoordsList.size();
+    auto firstRandomIndex =
+        static_cast<size_t>(randomFloat(0, movablePieceCount));
+    auto secondRandomIndex =
+        static_cast<size_t>(randomFloat(0, movablePieceCount));
+    if (firstRandomIndex == secondRandomIndex)
+    {
+        secondRandomIndex = (secondRandomIndex + 1) % movablePieceCount;
+    }
+    return std::make_pair(this->movablePieceCoordsList[firstRandomIndex],
+                          this->movablePieceCoordsList[secondRandomIndex]);
 }
 
 void Board::randomSwap()
@@ -269,6 +276,12 @@ float normalizedRandom()
     return std::rand() / static_cast<float>(RAND_MAX);
 }
 
+// Generate a random float between min and max
+float randomFloat(float min, float max)
+{
+    return min + (max - min) * normalizedRandom();
+}
+
 bool Board::solve(size_t epochMax = 1'000'000, float initialTemperature = 1,
                   float decayRate = 0.9999, bool verbose = false)
 {
@@ -276,6 +289,7 @@ bool Board::solve(size_t epochMax = 1'000'000, float initialTemperature = 1,
         return std::exp(-delta / temperature);
     };
 
+    this->movablePieceCoordsList = this->getMovablePieceCoordsList();
     Board optimalBoard = this->copy();
     float loss = this->loss();
     float optimalLoss = optimalBoard.loss();

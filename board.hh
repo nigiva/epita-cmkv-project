@@ -29,6 +29,7 @@ private:
     size_t numPieces;
     size_t numEdges;
     std::optional<std::pair<Coords, Coords>> lastRandomSwap;
+    std::vector<Coords> movablePieceCoordsList;
 
 public:
     Board(size_t size);
@@ -58,3 +59,4 @@ public:
 
 std::ostream &operator<<(std::ostream &os, const Board &board);
 float normalizedRandom();
+float randomFloat(float min, float max);

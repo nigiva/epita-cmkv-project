@@ -30,9 +30,10 @@ int main(int argc, char **argv)
     bool debug = debugArgsCondition;
     if (!defaultArgsCondition && !debugArgsCondition)
     {
-        std::cout << "Usage: " << argv[0]
-                  << " <input board filepath> <output solution filepath> (--debug)"
-                  << std::endl;
+        std::cout
+            << "Usage: " << argv[0]
+            << " <input board filepath> <output solution filepath> (--debug)"
+            << std::endl;
         return 1;
     }
 
@@ -52,7 +53,7 @@ int main(int argc, char **argv)
                                debug // verbose
     );
     if (debug)
-    {   
+    {
         std::cout << "\n---  RESULT  ---" << std::endl;
         std::cout << board << std::endl;
     }
