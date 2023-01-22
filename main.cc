@@ -47,8 +47,8 @@ int main(int argc, char **argv)
         std::cout << board << std::endl;
     }
 
-    auto success = board.solve(1'000'000, // epochMax
-                               1, // initialTemperature
+    auto success = board.solve(6'000'000, // epochMax
+                               6, // initialTemperature
                                0.9999, // decayRate
                                debug // verbose
     );

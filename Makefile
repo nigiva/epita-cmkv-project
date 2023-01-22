@@ -9,7 +9,15 @@ OBJ := $(SRC:.cc=.o)
 all: $(TARGET)
 
 test: $(TARGET)
-	./$(TARGET) data/input/s2-02.txt export.txt --debug
+	./$(TARGET) data/input/s4-01.txt export.txt --debug
+
+benchmark: benchmark4 benchmark6
+
+benchmark4: $(TARGET)
+	cat grill-4x4.sh | xargs hyperfine -i
+
+benchmark6: $(TARGET)
+	cat grill-6x6.sh | xargs hyperfine -i
 
 $(TARGET): $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS)
