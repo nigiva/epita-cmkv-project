@@ -13,13 +13,12 @@ private:
 
 public:
     Piece(int north, int east, int south, int west, bool isAnchored)
-    {
-        this->north = north;
-        this->east = east;
-        this->south = south;
-        this->west = west;
-        this->isAnchored = isAnchored;
-    }
+        : north(north)
+        , east(east)
+        , south(south)
+        , west(west)
+        , isAnchored(isAnchored)
+    {}
 
     int getNorth() const
     {

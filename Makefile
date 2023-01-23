@@ -1,6 +1,8 @@
 CC := g++
 CFLAGS := -Wall -Werror -Wextra -DNDEBUG -O5 -std=c++17 -lpthread -Wl,--no-as-needed # Release
-#CFLAGS := -Wall -Werror -Wextra -pg -no-pie -fno-builtin -std=c++17 -lpthread -Wl,--no-as-needed # Debug (Benchmark)
+#CFLAGS := -Wall -Werror -Wextra -g3 -no-pie -fno-builtin -std=c++17 -lpthread -Wl,--no-as-needed # Debug (Benchmark)
+#CFLAGS := -Wall -Werror -Wextra -pg -no-pie -fno-builtin -std=c++17 -Wl,--no-as-needed # Debug (GDB)
+
 TARGET := solver
 
 SRC := $(wildcard *.cc)

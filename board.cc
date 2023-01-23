@@ -1,6 +1,7 @@
 #include "board.hh"
 
 #include <algorithm>
+#include <assert.h>
 #include <cmath>
 #include <iostream>
 #include <random>
@@ -14,6 +15,10 @@ Board::Board(size_t size)
     , board(size, std::vector<std::optional<Piece>>(size))
     , numPieces(size * size)
     , numEdges(4 * size * size)
+    , lastRandomSwap(std::nullopt)
+    , lastLoss(std::nullopt)
+    , backupLoss(std::nullopt)
+    , lossIsComputed(false)
 {}
 
 void Board::setPiece(size_t x, size_t y, Piece piece)
@@ -38,6 +43,11 @@ std::optional<Piece> Board::getPiece(long long int x, long long int y) const
     }
 
     return board[x][y];
+}
+
+std::optional<Piece> Board::getPiece(const Coords &coords) const
+{
+    return getPiece(coords.x, coords.y);
 }
 
 std::string Board::getBoardSeperator(size_t size)
@@ -200,7 +210,9 @@ void Board::randomSwap()
 {
     std::pair<Coords, Coords> coordsPair = this->get2RandomMovablePieceCoords();
     this->lastRandomSwap = coordsPair;
+    this->backupLoss = this->loss();
     this->swap(coordsPair.first, coordsPair.second);
+    this->lossIsComputed = false;
 }
 
 void Board::reverseLastRandomSwap()
@@ -210,6 +222,9 @@ void Board::reverseLastRandomSwap()
         this->swap(this->lastRandomSwap.value().first,
                    this->lastRandomSwap.value().second);
         this->lastRandomSwap = std::nullopt;
+        this->lossIsComputed = true;
+        this->lastLoss = this->backupLoss;
+        this->backupLoss = std::nullopt;
     }
 }
 
@@ -224,80 +239,140 @@ void Board::swap(const Coords &coords1, const Coords &coords2)
     this->board[x2][y2] = temp;
 }
 
-float Board::loss() const
+float Board::loss()
+{
+    if (this->lossIsComputed)
+    {
+        return this->lastLoss.value();
+    }
+
+    float loss = 0;
+    this->lossIsComputed = true;
+    if (this->lastLoss.has_value())
+    {
+        loss = this->localLoss();
+        // assert(loss == this->globalLoss());
+    }
+    else
+    {
+        loss = this->globalLoss();
+    }
+
+    this->lastLoss = loss;
+    return loss;
+}
+
+float Board::globalLoss() const
 {
     float loss = 0;
-    size_t histogram[10] = { 0 };
 
-    for (int i = 0; i < static_cast<int>(this->size); i++)
+    for (size_t i = 0; i < this->size; i++)
     {
-        for (int j = 0; j < static_cast<int>(this->size); j++)
+        for (size_t j = 0; j < this->size; j++)
         {
             std::optional<Piece> piece = this->getPiece(i, j);
             if (!piece.has_value())
             {
                 continue;
             }
-            std::optional<Piece> topPiece = this->getPiece(i - 1, j);
-            std::optional<Piece> bottomPiece = this->getPiece(i + 1, j);
-            std::optional<Piece> leftPiece = this->getPiece(i, j - 1);
-            std::optional<Piece> rightPiece = this->getPiece(i, j + 1);
-
-            // Check if two edges are connected
-            // TOP
-            if (topPiece.has_value()
-                && piece.value().getNorth() != topPiece.value().getSouth())
-            {
-                loss += 1;
-            }
-            // BOTTOM
-            if (bottomPiece.has_value()
-                && piece.value().getSouth() != bottomPiece.value().getNorth())
-            {
-                loss += 1;
-            }
-            // LEFT
-            if (leftPiece.has_value()
-                && piece.value().getWest() != leftPiece.value().getEast())
-            {
-                loss += 1;
-            }
-            // RIGHT
-            if (rightPiece.has_value()
-                && piece.value().getEast() != rightPiece.value().getWest())
-            {
-                loss += 1;
-            }
-
-            // Compute histogram
-            // TOP
-            if (topPiece.has_value())
-            {
-                histogram[piece.value().getNorth()]++;
-            }
-            // BOTTOM
-            if (bottomPiece.has_value())
-            {
-                histogram[piece.value().getSouth()]++;
-            }
-            // LEFT
-            if (leftPiece.has_value())
-            {
-                histogram[piece.value().getWest()]++;
-            }
-            // RIGHT
-            if (rightPiece.has_value())
-            {
-                histogram[piece.value().getEast()]++;
-            }
+            loss += this->pieceLoss(Coords(i, j), piece.value());
         }
     }
-    loss /= this->numEdges;
-    for (int k = 0; k < 10; k++)
+    return loss / this->numEdges;
+}
+
+float Board::localLoss()
+{
+    auto coords1 = this->lastRandomSwap.value().first;
+    auto coords2 = this->lastRandomSwap.value().second;
+    float loss = this->lastLoss.value() * this->numEdges;
+
+    // Remove the loss of the two swapped pieces BEFORE the swap
+    this->swap(coords1, coords2);
+    loss -= this->pieceCrossLoss(coords1, coords2);
+    loss -= this->pieceCrossLoss(coords2, coords1);
+
+    // Add the loss of the two swapped pieces AFTER the swap
+    this->swap(coords1, coords2);
+    loss += this->pieceCrossLoss(coords1, coords2);
+    loss += this->pieceCrossLoss(coords2, coords1);
+
+    return loss / this->numEdges;
+}
+
+float Board::pieceCrossLoss(const Coords &firstCoords,
+                            const Coords &secondCoords) const
+{
+    float loss = 0;
+    auto piece = this->getPiece(firstCoords.x, firstCoords.y).value();
+    Coords topCoords = Coords(firstCoords.x - 1, firstCoords.y);
+    std::optional<Piece> topPiece = this->getPiece(topCoords);
+    Coords bottomCoords = Coords(firstCoords.x + 1, firstCoords.y);
+    std::optional<Piece> bottomPiece = this->getPiece(bottomCoords);
+    Coords leftCoords = Coords(firstCoords.x, firstCoords.y - 1);
+    std::optional<Piece> leftPiece = this->getPiece(leftCoords);
+    Coords rightCoords = Coords(firstCoords.x, firstCoords.y + 1);
+    std::optional<Piece> rightPiece = this->getPiece(rightCoords);
+
+    // Check if two edges are connected
+    // TOP
+    if (topPiece.has_value() && piece.getNorth() != topPiece.value().getSouth())
     {
-        histogram[k] = histogram[k] % 2;
-        loss += histogram[k] / 10;
+        loss += topCoords == secondCoords ? 1 : 2;
     }
+    // BOTTOM
+    if (bottomPiece.has_value()
+        && piece.getSouth() != bottomPiece.value().getNorth())
+    {
+        loss += bottomCoords == secondCoords ? 1 : 2;
+    }
+    // LEFT
+    if (leftPiece.has_value() && piece.getWest() != leftPiece.value().getEast())
+    {
+        loss += leftCoords == secondCoords ? 1 : 2;
+    }
+    // RIGHT
+    if (rightPiece.has_value()
+        && piece.getEast() != rightPiece.value().getWest())
+    {
+        loss += rightCoords == secondCoords ? 1 : 2;
+    }
+
+    return loss;
+}
+
+float Board::pieceLoss(const Coords &coords, const Piece &piece) const
+{
+    float loss = 0;
+    std::optional<Piece> topPiece = this->getPiece(coords.x - 1, coords.y);
+    std::optional<Piece> bottomPiece = this->getPiece(coords.x + 1, coords.y);
+    std::optional<Piece> leftPiece = this->getPiece(coords.x, coords.y - 1);
+    std::optional<Piece> rightPiece = this->getPiece(coords.x, coords.y + 1);
+
+    // Check if two edges are connected
+    // TOP
+    if (topPiece.has_value() && piece.getNorth() != topPiece.value().getSouth())
+    {
+        loss += 1;
+    }
+    // BOTTOM
+    if (bottomPiece.has_value()
+        && piece.getSouth() != bottomPiece.value().getNorth())
+    {
+        loss += 1;
+    }
+    // LEFT
+    if (leftPiece.has_value() && piece.getWest() != leftPiece.value().getEast())
+    {
+        loss += 1;
+    }
+    // RIGHT
+    if (rightPiece.has_value()
+        && piece.getEast() != rightPiece.value().getWest())
+    {
+        loss += 1;
+    }
+
     return loss;
 }
 
