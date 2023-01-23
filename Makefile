@@ -1,6 +1,6 @@
 CC := g++
 CFLAGS := -Wall -Werror -Wextra -DNDEBUG -O5 -std=c++17 -lpthread -Wl,--no-as-needed # Release
-#CFLAGS := -Wall -Werror -Wextra -pg -no-pie -fno-builtin -std=c++17 -lpthread -Wl,--no-as-needed # Debug
+#CFLAGS := -Wall -Werror -Wextra -pg -no-pie -fno-builtin -std=c++17 -lpthread -Wl,--no-as-needed # Debug (Benchmark)
 TARGET := solver
 
 SRC := $(wildcard *.cc)
@@ -29,7 +29,7 @@ clean:
 	$(RM) -rf $(TARGET) *.o
 
 profile:
-	./$(TARGET) data/input/s4-02.txt export.txt
+	./$(TARGET) data/input/s4-04.txt export.txt
 	rm -f profile.txt
 	gprof ./$(TARGET) gmon.out > profile.txt
 

@@ -227,6 +227,8 @@ void Board::swap(const Coords &coords1, const Coords &coords2)
 float Board::loss() const
 {
     float loss = 0;
+    size_t histogram[10] = { 0 };
+
     for (int i = 0; i < static_cast<int>(this->size); i++)
     {
         for (int j = 0; j < static_cast<int>(this->size); j++)
@@ -240,29 +242,63 @@ float Board::loss() const
             std::optional<Piece> bottomPiece = this->getPiece(i + 1, j);
             std::optional<Piece> leftPiece = this->getPiece(i, j - 1);
             std::optional<Piece> rightPiece = this->getPiece(i, j + 1);
+
+            // Check if two edges are connected
+            // TOP
             if (topPiece.has_value()
                 && piece.value().getNorth() != topPiece.value().getSouth())
             {
                 loss += 1;
             }
+            // BOTTOM
             if (bottomPiece.has_value()
                 && piece.value().getSouth() != bottomPiece.value().getNorth())
             {
                 loss += 1;
             }
+            // LEFT
             if (leftPiece.has_value()
                 && piece.value().getWest() != leftPiece.value().getEast())
             {
                 loss += 1;
             }
+            // RIGHT
             if (rightPiece.has_value()
                 && piece.value().getEast() != rightPiece.value().getWest())
             {
                 loss += 1;
             }
+
+            // Compute histogram
+            // TOP
+            if (topPiece.has_value())
+            {
+                histogram[piece.value().getNorth()]++;
+            }
+            // BOTTOM
+            if (bottomPiece.has_value())
+            {
+                histogram[piece.value().getSouth()]++;
+            }
+            // LEFT
+            if (leftPiece.has_value())
+            {
+                histogram[piece.value().getWest()]++;
+            }
+            // RIGHT
+            if (rightPiece.has_value())
+            {
+                histogram[piece.value().getEast()]++;
+            }
         }
     }
-    return loss / this->numEdges;
+    loss /= this->numEdges;
+    for (int k = 0; k < 10; k++)
+    {
+        histogram[k] = histogram[k] % 2;
+        loss += histogram[k] / 10;
+    }
+    return loss;
 }
 
 Board Board::copy() const
