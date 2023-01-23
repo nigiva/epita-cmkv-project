@@ -13,7 +13,7 @@ Board::Board(size_t size)
     : size(size)
     , board(size, std::vector<std::optional<Piece>>(size))
     , numPieces(size * size)
-    , numEdges(4 * size)
+    , numEdges(4 * size * size)
 {}
 
 void Board::setPiece(size_t x, size_t y, Piece piece)
