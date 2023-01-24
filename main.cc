@@ -9,6 +9,7 @@
 #include "board.hh"
 #include "piece.hh"
 
+const int numWorkers = 2;
 std::optional<std::string> result(std::nullopt);
 std::atomic<int> workerDoneCount(0);
 std::mutex lock;
@@ -31,7 +32,7 @@ std::string readFile(std::string filepath)
     return content;
 }
 
-void worker(std::string inputBoardContent, std::promise<std::string> p)
+void worker(std::string inputBoardContent)
 {
     Board board = Board::fromString(inputBoardContent);
     auto success = board.solve(1'000'000, // epochMax
@@ -41,53 +42,49 @@ void worker(std::string inputBoardContent, std::promise<std::string> p)
     );
     if (success)
     {
-        try
+        if (!result.has_value())
         {
-            p.set_value(std::move("success"));
+            // std::cout << "hey" << std::endl;
+            lock.lock();
+            result = "success";
+            lock.unlock();
         }
-        catch (const std::exception &e)
-        {
-            std::cerr << "Other thread already found the solution" << std::endl;
-            return;
         }
-    }
     else
     {
         std::cerr << "Worker finish but not success (loss=" << board.loss()
                   << ")" << std::endl;
     }
+    workerDoneCount++;
 }
 
 std::string runWorkers(std::string inputBoardContent)
 {
-    // promise
-    std::promise<std::string> p;
-    std::future<std::string> f = p.get_future();
-
     // thread list
-    int numWorkers = std::thread::hardware_concurrency();
-    std::vector<std::thread> threads;
+    std::thread threads[numWorkers];
 
     // Launch threads
     for (int i = 0; i < numWorkers; i++)
     {
-        std::thread thread =
-            std::thread(worker, inputBoardContent, std::move(p));
-        thread.detach();
-        threads.push_back(std::move(thread));
+        threads[i] = std::thread(worker, inputBoardContent);
+        threads[i].detach();
     }
 
     // Wait for threads to finish
     while (true)
     {
-        if (f.wait_for(std::chrono::milliseconds(0))
-            == std::future_status::ready)
+        if (result.has_value())
+        {
+            return *result;
+        }
+        if (workerDoneCount == numWorkers)
         {
             break;
         }
     }
 
-    return f.get();
+    std::cerr << "Unable to solve the board" << std::endl;
+    exit(1);
 }
 
 int main(int argc, char **argv)
