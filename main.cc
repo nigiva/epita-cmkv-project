@@ -10,9 +10,6 @@
 #include "piece.hh"
 
 const int numWorkers = 2;
-std::optional<std::string> result(std::nullopt);
-std::atomic<int> workerDoneCount(0);
-std::mutex lock;
 
 std::string readFile(std::string filepath)
 {
@@ -32,7 +29,7 @@ std::string readFile(std::string filepath)
     return content;
 }
 
-void worker(std::string inputBoardContent)
+std::optional<std::string> worker(std::string inputBoardContent)
 {
     Board board = Board::fromString(inputBoardContent);
     auto success = board.solve(1'000'000, // epochMax
@@ -42,47 +39,45 @@ void worker(std::string inputBoardContent)
     );
     if (success)
     {
-        if (!result.has_value())
-        {
-            // std::cout << "hey" << std::endl;
-            lock.lock();
-            result = "success";
-            lock.unlock();
-        }
-        }
+        return "success";
+    }
     else
     {
+        //
         std::cerr << "Worker finish but not success (loss=" << board.loss()
                   << ")" << std::endl;
+        return std::nullopt;
     }
-    workerDoneCount++;
 }
 
 std::string runWorkers(std::string inputBoardContent)
 {
-    // thread list
-    std::thread threads[numWorkers];
-
-    // Launch threads
+    std::vector<std::future<std::optional<std::string>>> futureList;
+    std::string result;
     for (int i = 0; i < numWorkers; i++)
     {
-        threads[i] = std::thread(worker, inputBoardContent);
-        threads[i].detach();
+        futureList.push_back(
+            std::async(std::launch::async, worker, inputBoardContent));
     }
 
-    // Wait for threads to finish
-    while (true)
+    int numberWorkersFinished = 0;
+    while (numberWorkersFinished < numWorkers)
     {
-        if (result.has_value())
+        numberWorkersFinished = 0;
+        for (auto &future : futureList)
         {
-            return *result;
-        }
-        if (workerDoneCount == numWorkers)
-        {
-            break;
+            if (future.wait_for(std::chrono::seconds(0))
+                == std::future_status::ready)
+            {
+                numberWorkersFinished++;
+                auto result = future.get();
+                if (result.has_value())
+                {
+                    return result.value();
+                }
+            }
         }
     }
-
     std::cerr << "Unable to solve the board" << std::endl;
     exit(1);
 }
@@ -117,5 +112,6 @@ int main(int argc, char **argv)
         std::cout << "\n---  RESULT  ---" << std::endl;
         std::cout << result << std::endl;
     }
+
     return 0;
 }
