@@ -3,6 +3,8 @@ CFLAGS := -Wall -Werror -Wextra -DNDEBUG -O5 -std=c++17 -lpthread -Wl,--no-as-ne
 #CFLAGS := -Wall -Werror -Wextra -g3 -no-pie -fno-builtin -std=c++17 -lpthread -Wl,--no-as-needed # Debug (Benchmark)
 #CFLAGS := -Wall -Werror -Wextra -pg -no-pie -fno-builtin -std=c++17 -Wl,--no-as-needed # Debug (GDB)
 
+BENCHMARK_ARGS := -i # --export-markdown benchmark.md
+
 TARGET := solver
 
 SRC := $(wildcard *.cc)
@@ -13,13 +15,22 @@ all: $(TARGET)
 test: $(TARGET)
 	./$(TARGET) data/input/s4-01.txt export.txt --debug
 
-benchmark: benchmark4 benchmark6
+benchmark: benchmark2 benchmark3 benchmark4 benchmark5 benchmark6
+
+benchmark2: $(TARGET)
+	cat grill-2x2.sh | xargs hyperfine $(BENCHMARK_ARGS)
+
+benchmark3: $(TARGET)
+	cat grill-3x3.sh | xargs hyperfine $(BENCHMARK_ARGS)
 
 benchmark4: $(TARGET)
-	cat grill-4x4.sh | xargs hyperfine -i
+	cat grill-4x4.sh | xargs hyperfine $(BENCHMARK_ARGS)
+
+benchmark5: $(TARGET)
+	cat grill-5x5.sh | xargs hyperfine $(BENCHMARK_ARGS)
 
 benchmark6: $(TARGET)
-	cat grill-6x6.sh | xargs hyperfine -i
+	cat grill-6x6.sh | xargs hyperfine $(BENCHMARK_ARGS)
 
 $(TARGET): $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS)
