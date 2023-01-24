@@ -1,6 +1,8 @@
 CC := g++
 CFLAGS := -Wall -Werror -Wextra -DNDEBUG -O5 -std=c++17 -lpthread -Wl,--no-as-needed # Release
-#CFLAGS := -Wall -Werror -Wextra -pg -no-pie -fno-builtin -std=c++17 -lpthread -Wl,--no-as-needed # Debug
+#CFLAGS := -Wall -Werror -Wextra -g3 -no-pie -fno-builtin -std=c++17 -lpthread -Wl,--no-as-needed # Debug (Benchmark)
+#CFLAGS := -Wall -Werror -Wextra -pg -no-pie -fno-builtin -std=c++17 -Wl,--no-as-needed # Debug (GDB)
+
 TARGET := solver
 
 SRC := $(wildcard *.cc)
@@ -9,7 +11,15 @@ OBJ := $(SRC:.cc=.o)
 all: $(TARGET)
 
 test: $(TARGET)
-	./$(TARGET) data/input/s2-02.txt export.txt --debug
+	./$(TARGET) data/input/s4-01.txt export.txt --debug
+
+benchmark: benchmark4 benchmark6
+
+benchmark4: $(TARGET)
+	cat grill-4x4.sh | xargs hyperfine -i
+
+benchmark6: $(TARGET)
+	cat grill-6x6.sh | xargs hyperfine -i
 
 $(TARGET): $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS)
@@ -21,7 +31,7 @@ clean:
 	$(RM) -rf $(TARGET) *.o
 
 profile:
-	./$(TARGET) data/input/s4-02.txt export.txt
+	./$(TARGET) data/input/s4-04.txt export.txt
 	rm -f profile.txt
 	gprof ./$(TARGET) gmon.out > profile.txt
 
