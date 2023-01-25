@@ -51,7 +51,7 @@ $(TARGET): $(OBJ)
 	$(CC) $(CFLAGS) -c $<
 
 clean:
-	$(RM) -rf $(TARGET) *.o
+	$(RM) -rf $(TARGET) *.o gmon.out
 
 profile:
 	./$(TARGET) data/input/s4-04.txt export/s4-01.txt
