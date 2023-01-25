@@ -13,7 +13,12 @@ OBJ := $(SRC:.cc=.o)
 all: $(TARGET)
 
 test: $(TARGET)
-	./$(TARGET) data/input/s4-01.txt export.txt --debug
+	bash testsuite.sh
+
+check: $(TARGET)
+	./$(TARGET) data/input/s4-01.txt export/s4-01.txt --debug
+
+bench: benchmark
 
 benchmark: benchmark2 benchmark3 benchmark4 benchmark5 benchmark6
 
