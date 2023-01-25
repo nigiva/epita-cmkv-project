@@ -47,22 +47,19 @@ int main(int argc, char **argv)
         std::cout << board << std::endl;
     }
 
-    auto success = board.solve(4'000'000, // epochMax
+    auto success = board.solve(10'000'000, // epochMax
                                2, // initialTemperature
-                               0.9999, // decayRate
+                               0.9999, // coldFactor
+                               0.999, // heatFactor
+                               10, // stuckCounterMax
                                debug // verbose
     );
+
     if (debug)
     {
         std::cout << "\n---  RESULT  ---" << std::endl;
         std::cout << board << std::endl;
     }
 
-    if (!success)
-    {
-        std::cerr << "Unable to solve the board (loss=" << board.loss() << ")"
-                  << std::endl;
-        return 1;
-    }
-    return 0;
+    return success ? 0 : 1;
 }

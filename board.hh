@@ -72,8 +72,9 @@ public:
     float loss();
 
     Board copy() const;
-    bool solve(size_t epochMax, float initialTemperature, float decayRate,
-               bool verbose);
+    bool solve(const size_t epochMax, const float initialTemperature,
+               const float coldFactor, const float heatFactor,
+               const size_t stuckCounterMax, const bool verbose);
 };
 
 std::ostream &operator<<(std::ostream &os, const Board &board);

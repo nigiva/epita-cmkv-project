@@ -297,6 +297,7 @@ float Board::localLoss()
     loss += this->pieceCrossLoss(coords1, coords2);
     loss += this->pieceCrossLoss(coords2, coords1);
 
+    loss = (loss < 1) ? 0 : loss; // Because of floating point errors
     return loss / this->numEdges;
 }
 
@@ -393,8 +394,9 @@ float randomFloat(float min, float max)
     return min + (max - min) * normalizedRandom();
 }
 
-bool Board::solve(size_t epochMax = 1'000'000, float initialTemperature = 1,
-                  float decayRate = 0.9999, bool verbose = false)
+bool Board::solve(const size_t epochMax, const float initialTemperature,
+                  const float coldFactor, const float heatFactor,
+                  const size_t stuckCounterMax, const bool verbose = false)
 {
     auto p = [&](float delta, float temperature) -> float {
         return std::exp(-delta / temperature);
@@ -408,6 +410,8 @@ bool Board::solve(size_t epochMax = 1'000'000, float initialTemperature = 1,
     float temperature = initialTemperature;
     bool success = false;
     size_t epochPerPercent = epochMax / 100;
+    const bool useReheating = (this->size >= 5);
+    size_t stuckCounter = 0;
 
     for (epoch = 0; epoch < epochMax; epoch++)
     {
@@ -418,13 +422,18 @@ bool Board::solve(size_t epochMax = 1'000'000, float initialTemperature = 1,
         if (epochLoss < loss || normalizedRandom() < p(lossDelta, temperature))
         {
             loss = epochLoss;
+            stuckCounter = 0;
             // Second optimisation
             // Because some time we fall in local minimum and the temperature
             // continue to decrease The resolver is stuck in a local minimum To
             // avoid this, we can freeze the temperature each time we fail to
             // find a better solution So when we are stuck in a local minimum,
             // the temperature is high enough to escape at some point
-            temperature *= decayRate;
+            // temperature *= coldFactor;
+            if (!useReheating)
+            {
+                temperature *= coldFactor;
+            }
         }
         else
         {
@@ -433,6 +442,24 @@ bool Board::solve(size_t epochMax = 1'000'000, float initialTemperature = 1,
             // we can just reverse the last swap
             // With this optimisation, we can go from 4s to 1s
             this->reverseLastRandomSwap();
+            stuckCounter++;
+        }
+
+        // Third optimisation
+        // When the board is big, the temperature decrease too fast
+        // And we are stuck in a local minimum
+        // So we can increase the temperature when we are stuck
+        if (useReheating)
+        {
+            if (stuckCounter >= stuckCounterMax)
+            {
+                temperature /= heatFactor;
+                stuckCounter = 0;
+            }
+            else
+            {
+                temperature *= coldFactor;
+            }
         }
 
         if (loss < optimalLoss)
@@ -444,7 +471,7 @@ bool Board::solve(size_t epochMax = 1'000'000, float initialTemperature = 1,
         if (epoch % epochPerPercent == 0 && verbose)
         {
             std::cout << "[" << epoch << "] Optimal loss : " << optimalLoss
-                      << std::endl;
+                      << " | temp : " << temperature << std::endl;
         }
 
         if (optimalLoss == 0)
@@ -460,5 +487,13 @@ bool Board::solve(size_t epochMax = 1'000'000, float initialTemperature = 1,
     }
 
     this->board = optimalBoard.board;
+    if (!success)
+    {
+        std::cerr << "Unable to solve the board !" << std::endl;
+        std::cout << "  * Temperature : " << temperature << std::endl;
+        std::cout << "  * Loss : " << optimalLoss << std::endl;
+
+        this->board = optimalBoard.board;
+    }
     return success;
 }
