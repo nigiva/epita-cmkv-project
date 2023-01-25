@@ -49,6 +49,7 @@ public:
      * Creates a piece from a string representation.
      */
     static Piece fromString(std::string s);
+    std::string toString() const;
 };
 
 std::ostream &operator<<(std::ostream &os, const Piece &p);

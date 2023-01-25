@@ -56,6 +56,7 @@ public:
     Board(size_t size);
     Board(std::vector<Piece> pieces);
     static Board fromString(std::string input);
+    std::string toString() const;
 
     friend std::ostream &operator<<(std::ostream &os, const Board &board);
     void print() const;

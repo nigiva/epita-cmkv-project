@@ -94,6 +94,23 @@ Board Board::fromString(std::string input)
     return board;
 }
 
+std::string Board::toString() const
+{
+    std::string buffer = "";
+    for (size_t i = 0; i < size; i++)
+    {
+        for (size_t j = 0; j < size; j++)
+        {
+            if (board[i][j].has_value())
+            {
+                buffer += board[i][j].value().toString();
+            }
+            buffer += "\n";
+        }
+    }
+    return buffer;
+}
+
 size_t Board::getSize() const
 {
     return size;

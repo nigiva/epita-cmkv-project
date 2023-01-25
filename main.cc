@@ -23,6 +23,19 @@ std::string readFile(std::string filepath)
     return content;
 }
 
+// Write the board to the output file
+void writeFile(std::string filepath, std::string content)
+{
+    std::ofstream file(filepath);
+    if (!file.is_open())
+    {
+        throw "Unable to open file";
+    }
+
+    file << content;
+    file.close();
+}
+
 int main(int argc, char **argv)
 {
     bool defaultArgsCondition = (argc == 3);
@@ -60,6 +73,9 @@ int main(int argc, char **argv)
         std::cout << "\n---  RESULT  ---" << std::endl;
         std::cout << board << std::endl;
     }
+
+    std::string outputBoardContent = board.toString();
+    writeFile(outputPath, outputBoardContent);
 
     return success ? 0 : 1;
 }

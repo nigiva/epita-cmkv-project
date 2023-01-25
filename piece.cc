@@ -59,6 +59,16 @@ Piece Piece::fromString(std::string s)
     return Piece(north, east, south, west, isAnchored);
 }
 
+std::string Piece::toString() const
+{
+    std::string s;
+    s += std::to_string(north);
+    s += std::to_string(west);
+    s += std::to_string(east);
+    s += std::to_string(south);
+    return s;
+}
+
 /** std:cout << Piece */
 std::ostream &operator<<(std::ostream &os, const Piece &p)
 {
