@@ -3,7 +3,7 @@ CFLAGS := -Wall -Werror -Wextra -DNDEBUG -O5 -std=c++17 -lpthread -Wl,--no-as-ne
 #CFLAGS := -Wall -Werror -Wextra -g3 -no-pie -fno-builtin -std=c++17 -lpthread -Wl,--no-as-needed # Debug (Benchmark)
 #CFLAGS := -Wall -Werror -Wextra -pg -no-pie -fno-builtin -std=c++17 -Wl,--no-as-needed # Debug (GDB)
 
-BENCHMARK_ARGS := -i # --export-markdown benchmark.md
+BENCHMARK_ARGS := -w 4 # --export-markdown benchmark.md
 
 TARGET := solver
 
