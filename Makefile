@@ -14,8 +14,10 @@ all: $(TARGET)
 
 test: $(TARGET)
 	bash testsuite.sh
+	bash checkref.sh
 
 check: $(TARGET)
+	mkdir -p export
 	./$(TARGET) data/input/s4-01.txt export/s4-01.txt --debug
 
 bench: benchmark
@@ -23,18 +25,23 @@ bench: benchmark
 benchmark: benchmark2 benchmark3 benchmark4 benchmark5 benchmark6
 
 benchmark2: $(TARGET)
+	mkdir -p export
 	cat grill-2x2.sh | xargs hyperfine $(BENCHMARK_ARGS)
 
 benchmark3: $(TARGET)
+	mkdir -p export
 	cat grill-3x3.sh | xargs hyperfine $(BENCHMARK_ARGS)
 
 benchmark4: $(TARGET)
+	mkdir -p export
 	cat grill-4x4.sh | xargs hyperfine $(BENCHMARK_ARGS)
 
 benchmark5: $(TARGET)
+	mkdir -p export
 	cat grill-5x5.sh | xargs hyperfine $(BENCHMARK_ARGS)
 
 benchmark6: $(TARGET)
+	mkdir -p export
 	cat grill-6x6.sh | xargs hyperfine $(BENCHMARK_ARGS)
 
 $(TARGET): $(OBJ)
@@ -47,7 +54,7 @@ clean:
 	$(RM) -rf $(TARGET) *.o
 
 profile:
-	./$(TARGET) data/input/s4-04.txt export.txt
+	./$(TARGET) data/input/s4-04.txt export/s4-01.txt
 	rm -f profile.txt
 	gprof ./$(TARGET) gmon.out > profile.txt
 
