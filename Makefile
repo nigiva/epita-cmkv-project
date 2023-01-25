@@ -13,8 +13,8 @@ OBJ := $(SRC:.cc=.o)
 all: $(TARGET)
 
 test: $(TARGET)
-	bash testsuite.sh
-	bash checkref.sh
+	bash test/testsuite.sh
+	bash test/checkref.sh
 
 check: $(TARGET)
 	mkdir -p export
@@ -58,4 +58,4 @@ profile:
 	rm -f profile.txt
 	gprof ./$(TARGET) gmon.out > profile.txt
 
-.PHONY: all clean
+.PHONY: all clean test bench benchmark benchmark2 benchmark3 benchmark4 benchmark5 benchmark6 check profile
