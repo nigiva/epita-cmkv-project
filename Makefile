@@ -26,23 +26,23 @@ benchmark: benchmark2 benchmark3 benchmark4 benchmark5 benchmark6
 
 benchmark2: $(TARGET)
 	mkdir -p export
-	cat grill-2x2.sh | xargs hyperfine $(BENCHMARK_ARGS)
+	cat grill-2x2.args.txt | xargs hyperfine $(BENCHMARK_ARGS)
 
 benchmark3: $(TARGET)
 	mkdir -p export
-	cat grill-3x3.sh | xargs hyperfine $(BENCHMARK_ARGS)
+	cat grill-3x3.args.txt | xargs hyperfine $(BENCHMARK_ARGS)
 
 benchmark4: $(TARGET)
 	mkdir -p export
-	cat grill-4x4.sh | xargs hyperfine $(BENCHMARK_ARGS)
+	cat grill-4x4.args.txt | xargs hyperfine $(BENCHMARK_ARGS)
 
 benchmark5: $(TARGET)
 	mkdir -p export
-	cat grill-5x5.sh | xargs hyperfine $(BENCHMARK_ARGS)
+	cat grill-5x5.args.txt | xargs hyperfine $(BENCHMARK_ARGS)
 
 benchmark6: $(TARGET)
 	mkdir -p export
-	cat grill-6x6.sh | xargs hyperfine $(BENCHMARK_ARGS)
+	cat grill-6x6.args.txt | xargs hyperfine $(BENCHMARK_ARGS)
 
 $(TARGET): $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS)
