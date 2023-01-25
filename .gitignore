@@ -1,5 +1,6 @@
 # Binary files
 solver
+export/
 
 # IDE
 .vscode/
