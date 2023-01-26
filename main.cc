@@ -5,6 +5,8 @@
 #include "board.hh"
 #include "piece.hh"
 
+// Read the board from the input file
+// * `filepath` is the path to the input file
 std::string readFile(std::string filepath)
 {
     std::string content;
@@ -24,6 +26,8 @@ std::string readFile(std::string filepath)
 }
 
 // Write the board to the output file
+// * `filepath` is the path to the output file
+// * `content` is the content to write in the output file
 void writeFile(std::string filepath, std::string content)
 {
     std::ofstream file(filepath);
@@ -36,6 +40,7 @@ void writeFile(std::string filepath, std::string content)
     file.close();
 }
 
+// Main function
 int main(int argc, char **argv)
 {
     bool defaultArgsCondition = (argc == 3);

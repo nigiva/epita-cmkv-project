@@ -399,13 +399,11 @@ Board Board::copy() const
     return Board(*this);
 }
 
-// Generate a random float between 0 and 1
 float normalizedRandom()
 {
     return std::rand() / static_cast<float>(RAND_MAX);
 }
 
-// Generate a random float between min and max
 float randomFloat(float min, float max)
 {
     return min + (max - min) * normalizedRandom();
