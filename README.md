@@ -4,8 +4,6 @@
 
 Le but est de résoudre à l'ordinateur un problème combinatoire basé sur le jeu [Tetravex](https://fr.wikipedia.org/wiki/Tetravex) (paquet gnome-tetravex).
 
-:warning: Le rendu se fait par mail à thierry.geraud@epita.fr avant le 20 janvier 2023 (à 23h51)
-
 ## 2. Membres du groupe
 
 | Nom              | Email (@epita.fr)         | Pseudo  Github |
